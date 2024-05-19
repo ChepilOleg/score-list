@@ -1,0 +1,86 @@
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+body {
+    margin: 0px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0px;
+    width: 100%;
+    height: 30px;
+    background-image: linear-gradient(195deg, rgb(41, 40, 40), rgb(106, 106, 106));
+}
+
+.new-table {
+    margin: 20px;
+    width: 25px;
+    height: 25px;
+}
+
+.create_new_person {
+    background-color: rgba(190, 251, 231, 0.815);
+    width: 250px;
+    margin: auto;
+    padding: 10px;
+    box-sizing: border-box;
+    display: none;
+}
+
+
+.list_new_person>section {
+    margin: 2px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.color-inp {
+    width: 30px;
+    height: 20px;
+}
+
+.name-inp {
+    height: 20px;
+}
+
+.button {
+    margin: 20px;
+    display: flex;
+    justify-content: space-evenly;
+    margin: auto;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
+
+li>section {
+    display: flex;
+    flex-direction: row;
+    height: 20px;
+}
+
+li>section>p {
+    margin: 0px;
+    margin-left: 5px;
+}
+
+li>section>input {
+    width: 30px;
+}
+
+.marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 90px;
+    background-color: aqua;
+}
