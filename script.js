@@ -1,145 +1,176 @@
-let taibles = {};
-let players = [];
-let nameTaible = "";
-let list = document.querySelector(".list");
-let main = document.querySelector(".create_new_person");
-let listNewPersone = document.querySelector(".list_new_person");
+let menu = document.querySelector("#menu");
+let hidens = document.querySelector("#hidens");
+let modalBacgraund = document.querySelector("#modal_bacgraund");
+let tables = document.querySelector("#modal_table");
+let newTable = document.querySelector("#modal_new_plaer_menu");
+let listNP = document.querySelector("#modal_new_plaer_list");
+let listPlaersOnTable = document.querySelector("#ThisTablePlaers");
+let plasing = document.querySelector("#plasing");
 
-let start = () => {
-    let pals = document.querySelector(".plas");
-    let plasing = document.querySelector(".plasing");
-    let newTable = document.querySelector(".new-table");
-    let end = document.querySelector(".end");
-    newTable.addEventListener("click", () => createANewTable());
-    pals.addEventListener("click", () => newPlayerInput());
-    end.addEventListener("click", () => showNewList());
-    plasing.addEventListener("click", () => plassing());
-};
+function plas() {
+    let li = document.createElement("li");
+    li.innerHTML = `<section class="create-plaers">
+                        <input
+                            type="color"
+                            name="color"
+                            class="create-color"
+                        />
+                        <input
+                            type="text"
+                            name="name"
+                            class="create-name"
+                        />
+                    </section>`;
 
-class Player {
-    constructor(name, color, score) {
-        this._name = name;
-        this._color = color;
-        this._score = score || 0;
-    }
-
-    plas = (value) => {
-        this._score += +value;
-        return this._score + " + ";
-    };
-
-    get score() {
-        return +this._score;
-    }
-
-    showPlayer = () => {
-        return `<section>
-        <div class="marker"style="background-color: ${this._color}"></div>
-        <p class="name">${this._name}</p>
-        </section>
-        <section>
-        <p class="score">${this._score} + </p>
-        <input class="nam" type="number" />
-        </section> `;
-    };
+    listNP.append(li);
 }
 
-let createANewTable = () => {
-    if (!confirm("Бажаєте розпочати нову гру?")) return;
-    let x = getLocalStorege("taibles");
-    nameTaible = prompt(x.join(" | "));
-    if (!nameTaible) {
-        return;
-    } else if (x.includes(nameTaible)) {
-        unMemoring();
-        showList();
+function openMenu() {
+    tables.innerHTML = "";
+    modalBacgraund.style.visibility = "visible";
+    modalBacgraund.append(tables);
+    console.log(listTable);
+    listTable.forEach((item) => {
+        let table = document.createElement("section");
+        table.innerHTML = ` <img src="icons/New_table.png" />
+                            <p>${item}</p>`;
+        table.dataset.nameTable = item;
+        tables.append(table);
+    });
+}
+function tablesList(event) {
+    let table = event.target.closest("section");
+    if (table.dataset.nameTable === "New") {
+        modalBacgraund.append(newTable);
+        plas();
+        plas();
+        hidens.append(tables);
     } else {
-        main.style.display = "block";
-        taibles[nameTaible] = [];
-
-        newPlayerInput();
+        thisTable = getLocalStorege("Table=" + table.dataset.nameTable);
+        showThisTaplePlaer();
+        listNP.innerHTML = "";
+        hidens.append(newTable);
+        modalBacgraund.style.visibility = "hidden";
     }
-};
+}
 
-let newPlayerInput = () => {
-    let personInput = document.createElement("section");
-    personInput.innerHTML = `<input class="color-inp" type="color" />
-    <input class="name-inp" type="text" />`;
-    listNewPersone.append(personInput);
-};
+function createNewTable(event) {
+    function end() {
+        let forms = document.forms[0];
+        let inputs = forms.elements;
+        thisTable.plaers = [];
+        for (let x = 0; x < inputs.length; x += 2) {
+            let name = inputs[x + 1].value;
+            if (!name) break;
+            thisTable.plaers.forEach((item) => {
+                while (true) {
+                    if (item.name == name) {
+                        name = prompt("Такий гравець уже є '" + name + "'");
+                    } else {
+                        break;
+                    }
+                }
+            });
 
-let readInp = () => {
-    list.innerHTML = "";
-    players = [];
-    let inputs = document.querySelectorAll("input");
-    for (let i = 0; i < inputs.length; i += 2) {
-        if (!inputs[i + 1].value) break;
-        let player = new Player(inputs[i + 1].value, inputs[i].value);
-        players.push(player);
+            let pl = {
+                color: inputs[x].value,
+                name: name,
+                score: 0
+            };
+            thisTable.plaers.push(pl);
+        }
+
+        while (true) {
+            let name = prompt("Ведіть назву столу");
+
+            if (listTable.includes(name)) {
+                alert("Такий стіл вже існує");
+            } else if (name != "") {
+                thisTable.name = name;
+                listNP.innerHTML = "";
+                hidens.append(newTable);
+                modalBacgraund.style.visibility = "hidden";
+                listTable.push(name);
+                setLocalStorege("Table_List", listTable);
+                setLocalStorege("Table=" + name, thisTable);
+                break;
+            }
+        }
+
+        showThisTaplePlaer();
     }
-    main.style.display = "none";
-    listNewPersone.innerHTML = "";
-    console.log(players);
-    return;
-};
-
-let showList = () => {
-    list.innerHTML = "";
-    players.sort((a, b) => {
-        if (a.score > b.score) return -1;
-    });
-    players.forEach((item) => {
-        let li = document.createElement("li");
-        li.innerHTML = item.showPlayer();
-        list.append(li);
-    });
-    taibles[nameTaible] = players;
-};
-
-let plassing = () => {
-    let scoreList = document.querySelectorAll(".score");
-    let namList = document.querySelectorAll(".nam");
-    let i = 0;
-    scoreList.forEach((item) => {
-        item.innerHTML = players[i].plas(namList[i].value);
-        namList[i].value = "";
-        i++;
-    });
-    showList();
-    setLocalStorege(`table=${nameTaible}`, players);
-};
-
-const getLocalStorege = (name) => {
-    return JSON.parse(localStorage.getItem(name)) || [];
-};
-const setLocalStorege = (name, task) => {
-    localStorage.setItem(name, JSON.stringify(task));
-};
-let taibleList = () => {
-    let taibles = getLocalStorege("taibles");
-    if (!nameTaible) {
-        nameTaible = taibles[0];
-    } else {
-        nameTaible = prompt(taibles.join(" / "));
+    if (event.target.id === "plas") {
+        plas();
+    } else if (event.target.id === "end") {
+        end();
     }
-};
-taibleList();
-let unMemoring = () => {
-    players = [];
-    getLocalStorege(`table=${nameTaible}`).forEach((item) => {
-        let pl = new Player(item._name, item._color, item._score);
-        players.push(pl);
+}
+
+function showThisTaplePlaer() {
+    listPlaersOnTable.innerHTML = "";
+    let nameTable = document.querySelector("#name-table");
+    nameTable.innerHTML = thisTable.name;
+    for (let x = 0; x < thisTable.plaers.length; x++) {
+        let plaer = document.createElement("li");
+        plaer.innerHTML = ` <div class="plaer">
+                                <div>
+                                    <div
+                                        class="color-ring"
+                                        style="background-color: ${thisTable.plaers[x].color}"
+                                    ></div>
+                                    <p>${thisTable.plaers[x].name}</p>
+                                </div>
+                                    <div class = "score">
+                                    <p>${thisTable.plaers[x].score}</p>
+                                    <input type="number">
+                                </div>
+                            </div>`;
+        listPlaersOnTable.append(plaer);
+    }
+}
+
+function endMath() {
+    let scoreL = document.querySelectorAll(".plaer");
+    scoreL.forEach((item) => {
+        console.log(item);
+        let name = item.children[0].children[1].innerHTML;
+        let thisScore = +item.children[1].children[0].innerHTML;
+        let plas = +item.children[1].children[1].value;
+
+        thisTable.plaers.find((item) => {
+            if (item.name === name) {
+                item.score = thisScore + plas;
+            }
+        });
+
+        item.children[1].children[0].innerHTML = thisScore + plas;
+        item.children[1].children[1].value = "";
     });
+    thisTable.plaers.sort((a, b) => b.score - a.score);
+    setLocalStorege("Table=" + thisTable.name, thisTable);
+    // ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ
+    showThisTaplePlaer();
+    // ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ
+}
+
+// Збереження і завантаження
+
+const getLocalStorege = (name) => JSON.parse(localStorage.getItem(name)) || [];
+
+const setLocalStorege = (name, products) => {
+    localStorage.setItem(name, JSON.stringify(products));
 };
-unMemoring();
-showList();
-let showNewList = () => {
-    readInp();
-    showList();
-    x = getLocalStorege("taibles");
-    x.push(nameTaible);
-    setLocalStorege("taibles", x);
-    setLocalStorege(`table=${nameTaible}`, players);
-    console.log(players);
-};
-start();
+
+let listTable = getLocalStorege("Table_List");
+if (!listTable.includes("New")) {
+    listTable.unshift("New");
+}
+let thisTable = {};
+// Збереження і завантаження
+
+menu.addEventListener("click", openMenu);
+tables.addEventListener("click", tablesList);
+newTable.addEventListener("click", createNewTable);
+plasing.addEventListener("click", endMath);
+
+openMenu();

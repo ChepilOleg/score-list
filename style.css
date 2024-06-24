@@ -1,11 +1,56 @@
-ul {
-    list-style: none;
-    padding: 0;
-}
-
 body {
     margin: 0px;
 }
+
+#hidens {
+    display: none;
+}
+
+.plaer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.plaer>div {
+    display: flex;
+}
+
+.plaer>div>input {
+    width: 30px;
+}
+
+li::marker {
+    font-weight: 700;
+    font-size: 20px;
+}
+
+#ThisTablePlaers {
+    margin: 8px 16px;
+}
+
+.color-ring {
+    height: 20px;
+    width: 20px;
+    border-radius: 100%;
+    margin-right: 8px;
+}
+
+#ThisTablePlaers>li>div {
+    display: flex;
+}
+
+h1 {
+    text-align: center;
+    margin: 4px;
+}
+
+p {
+    font-weight: 400;
+    font-size: 20px;
+    margin: 0px;
+}
+
+/* HEADER */
 
 .header {
     display: flex;
@@ -17,70 +62,91 @@ body {
     background-image: linear-gradient(195deg, rgb(41, 40, 40), rgb(106, 106, 106));
 }
 
-.new-table {
+#menu {
     margin: 20px;
     width: 25px;
     height: 25px;
 }
 
-.create_new_person {
-    background-color: rgba(190, 251, 231, 0.815);
-    width: 250px;
-    margin: auto;
-    padding: 10px;
+/* MODAL */
+
+#modal_bacgraund {
+    position: absolute;
+    background-color: rgba(190, 251, 231, 0.5);
+    width: 100%;
+    height: 100%;
     box-sizing: border-box;
-    display: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
 }
 
+/* MODAL NEW PLAER */
 
-.list_new_person>section {
-    margin: 2px;
+
+#modal_new_plaer_menu {
+    background-color: rgb(177, 177, 246);
+    border: 1px solid rgb(91, 91, 126);
+    border-radius: 30px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.create-plaers {
+    box-sizing: border-box;
     height: 30px;
     display: flex;
     align-items: center;
-    justify-content: space-around;
 }
 
-.color-inp {
-    width: 30px;
+.create-color {
+    height: 28px;
+    width: 28px;
+}
+
+.create-name {
+    margin-left: 8px;
     height: 20px;
+    width: 70%;
 }
 
-.name-inp {
-    height: 20px;
-}
-
-.button {
-    margin: 20px;
+#buttons {
     display: flex;
     justify-content: space-evenly;
-    margin: auto;
 }
 
-li {
+/* MODAL TABLE */
+
+#modal_table {
     display: flex;
-    justify-content: space-between;
-    margin: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-li>section {
+#modal_table>section {
+    box-sizing: border-box;
+    width: 80px;
+    height: 56px;
+    padding: 4px;
     display: flex;
-    flex-direction: row;
-    height: 20px;
+    flex-direction: column;
+    align-items: center;
+    border: 0.5px black solid;
+    border-radius: 5px;
 }
 
-li>section>p {
-    margin: 0px;
-    margin-left: 5px;
-}
-
-li>section>input {
+#modal_table>section>img {
     width: 30px;
 }
 
-.marker {
-    width: 20px;
-    height: 20px;
-    border-radius: 90px;
-    background-color: aqua;
+#modal_table>section>p {
+    margin: 0px;
+}
+
+#menu {
+    margin: 20px;
+    width: 25px;
+    height: 25px;
 }
