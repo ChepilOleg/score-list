@@ -1,108 +1,233 @@
-let menu = document.querySelector("#menu");
-let hidens = document.querySelector("#hidens");
+let menuBotton = document.querySelector("#menu-button");
 let modalBacgraund = document.querySelector("#modal_bacgraund");
-let tables = document.querySelector("#modal_table");
-let newTable = document.querySelector("#modal_new_plaer_menu");
-let listNP = document.querySelector("#modal_new_plaer_list");
+
 let listPlaersOnTable = document.querySelector("#ThisTablePlaers");
 let plasing = document.querySelector("#plasing");
 
-function plas() {
-    let li = document.createElement("li");
-    li.innerHTML = `<section class="create-plaers">
-                        <input
-                            type="color"
-                            name="color"
-                            class="create-color"
-                        />
-                        <input
-                            type="text"
-                            name="name"
-                            class="create-name"
-                        />
-                    </section>`;
+function mainMenu(prop = "close") {
+    let hidens = document.querySelector("#hidens");
+    let children = modalBacgraund.children;
+    hidens.append(...children);
 
-    listNP.append(li);
+    if (prop != "close") {
+        modalBacgraund.style.visibility = "visible";
+        if (prop === "table") {
+            let tables = document.querySelector("#modal_table");
+            tables.innerHTML = "";
+            modalBacgraund.append(tables);
+            tables.addEventListener("pointerdown", tablesList);
+            tables.addEventListener("click", tablesList);
+
+            listTable.forEach((item) => {
+                let table = document.createElement("section");
+                table.classList.add("taible_page");
+                table.innerHTML = ` <img src="icons/New_table.png" />
+                                        <p>${item}</p>`;
+                table.dataset.nameTable = item;
+                tables.append(table);
+            });
+
+            return;
+        } else if (prop === "plaers") {
+            let newTable = document.querySelector("#modal_new_plaer_menu");
+            modalBacgraund.append(newTable);
+            createNewTable();
+            newTable.addEventListener("click", createNewTable);
+            newTable.addEventListener("input", createNewTable);
+            return;
+        } else {
+            alert("Функція отримала не коректні данні");
+        }
+    }
+    modalBacgraund.style.visibility = "hidden";
 }
-
 function openMenu() {
-    tables.innerHTML = "";
-    modalBacgraund.style.visibility = "visible";
-    modalBacgraund.append(tables);
-    console.log(listTable);
-    listTable.forEach((item) => {
-        let table = document.createElement("section");
-        table.innerHTML = ` <img src="icons/New_table.png" />
-                            <p>${item}</p>`;
-        table.dataset.nameTable = item;
-        tables.append(table);
-    });
+    mainMenu("table");
 }
+
 function tablesList(event) {
     let table = event.target.closest("section");
-    if (table.dataset.nameTable === "New") {
-        modalBacgraund.append(newTable);
-        plas();
-        plas();
-        hidens.append(tables);
-    } else {
-        thisTable = getLocalStorege("Table=" + table.dataset.nameTable);
-        showThisTaplePlaer();
-        listNP.innerHTML = "";
-        hidens.append(newTable);
-        modalBacgraund.style.visibility = "hidden";
+    switch (event.type) {
+        case "click":
+            if (table.dataset.nameTable === "New") {
+                mainMenu("plaers");
+            } else {
+                thisTable = getLocalStorege("Table=" + table.dataset.nameTable);
+                showThisTaplePlaer();
+                mainMenu();
+            }
+            break;
+        case "pointerdown":
+            event.target.addEventListener("pointerup", () => {
+                clearTimeout(timer);
+            });
+
+            function dragon(target) {
+                target.ondragstart = function () {
+                    return false;
+                };
+                console.log(target);
+                let oldPozition;
+                let ower;
+                let owerSibling;
+                if (target.previousElementSibling) {
+                    oldPozition = [target.previousElementSibling, "after"];
+                } else if (target.nextElementSibling) {
+                    oldPozition = [target.nextElementSibling, "before"];
+                } else if (target.parentElement) {
+                    oldPozition = [target.parentElement, "child"];
+                }
+                target.style.position = "absolute";
+                modalBacgraund.append(target);
+
+                function moveAt(x, y) {
+                    target.style.left = x - target.offsetWidth / 2 + "px";
+                    target.style.top = y - target.offsetHeight / 2 + "px";
+
+                    ower = document.elementsFromPoint(
+                        x + target.offsetWidth,
+                        y + target.offsetHeight
+                    );
+
+                    if (ower[0]?.classList[0] == target.classList[0]) {
+                        if (ower != owerSibling) {
+                            if (owerSibling)
+                                owerSibling.classList.remove("ower");
+                            owerSibling = ower[0];
+                            owerSibling.classList.add("ower");
+                        }
+                    }
+                }
+
+                function onMouseMove(event) {
+                    moveAt(event.pageX, event.pageY);
+                }
+
+                function drop() {
+                    document.removeEventListener("pointermove", onMouseMove);
+                    target.style.position = "";
+                    switch (oldPozition[1]) {
+                        case "after":
+                            oldPozition[0].after(target);
+                            break;
+                        case "before":
+                            oldPozition[0].before(target);
+                            break;
+                        case "child":
+                            oldPozition[0].append(target);
+                            break;
+                    }
+                    document.querySelectorAll(".ower").forEach((item) => {
+                        item.classList.remove("ower");
+                    });
+                }
+
+                moveAt(event.pageX, event.pageY);
+                document.addEventListener("pointermove", onMouseMove);
+                target.addEventListener("pointerup", drop);
+            }
+
+            let timer = setTimeout(function () {
+                event.target.oncontextmenu = function () {
+                    return false;
+                };
+                dragon(table);
+            }, 1000);
+            break;
     }
 }
 
 function createNewTable(event) {
-    function end() {
-        let forms = document.forms[0];
-        let inputs = forms.elements;
-        thisTable.plaers = [];
-        for (let x = 0; x < inputs.length; x += 2) {
-            let name = inputs[x + 1].value;
-            if (!name) break;
-            thisTable.plaers.forEach((item) => {
-                while (true) {
-                    if (item.name == name) {
-                        name = prompt("Такий гравець уже є '" + name + "'");
-                    } else {
-                        break;
-                    }
-                }
-            });
+    let listNP = document.querySelector("#modal_new_plaer_list");
 
-            let pl = {
-                color: inputs[x].value,
-                name: name,
-                score: 0
-            };
-            thisTable.plaers.push(pl);
-        }
+    function plas() {
+        let li = document.createElement("li");
+        li.innerHTML = `<section class="create-plaers">
+                            <input
+                                type="color"
+                                name="color"
+                                class="create-color"
+                            />
+                            <input
+                                type="text"
+                                name="name"
+                                class="create-name"
+                            />
+                        </section>`;
 
-        while (true) {
-            let name = prompt("Ведіть назву столу");
-
-            if (listTable.includes(name)) {
-                alert("Такий стіл вже існує");
-            } else if (name != "") {
-                thisTable.name = name;
-                listNP.innerHTML = "";
-                hidens.append(newTable);
-                modalBacgraund.style.visibility = "hidden";
-                listTable.push(name);
-                setLocalStorege("Table_List", listTable);
-                setLocalStorege("Table=" + name, thisTable);
-                break;
-            }
-        }
-
-        showThisTaplePlaer();
+        listNP.append(li);
     }
-    if (event.target.id === "plas") {
+
+    if (!event) {
+        listNP.innerHTML = "";
         plas();
-    } else if (event.target.id === "end") {
-        end();
+        return;
+    } else if (event.type === "click") {
+        function end() {
+            let forms = document.forms.plaer;
+            let inputs = forms.elements;
+            thisTable.plaers = [];
+            for (let x = 0; x < inputs.length; x += 2) {
+                let name = inputs[x + 1].value;
+                if (!name) break;
+
+                thisTable.plaers.forEach((item) => {
+                    if (item.name == name) {
+                        function repetition(x) {
+                            for (let item of thisTable.plaers) {
+                                if (item.name === name + `(${x})`) {
+                                    return repetition(x + 1);
+                                }
+                            }
+                            return x;
+                        }
+                        name += `(${repetition(1)})`;
+                    }
+                });
+
+                let pl = {
+                    color: inputs[x].value,
+                    name: name,
+                    score: 0
+                };
+                thisTable.plaers.push(pl);
+            }
+
+            let name = prompt("Введіть назву столу");
+            while (true) {
+                if (listTable.includes(name)) {
+                    name = prompt("Стіл із таким іменем уже існує");
+                } else if (!name) {
+                    if (confirm("Ви бажаєте скасувати створення столу?")) {
+                        mainMenu("table");
+                        thisTable = {};
+                        return;
+                    } else {
+                        name = prompt("Введіть назву столу");
+                    }
+                } else {
+                    thisTable.name = name;
+                    mainMenu();
+                    listTable.push(name);
+                    setLocalStorege("Table_List", listTable);
+                    setLocalStorege("Table=" + name, thisTable);
+                    break;
+                }
+            }
+
+            showThisTaplePlaer();
+        }
+
+        if (event.target.id === "plas") {
+            plas();
+        } else if (event.target.id === "end") {
+            end();
+        }
+    } else if (event.type === "input") {
+        let inp = event.target.closest("li");
+        if (inp === inp.parentElement.lastElementChild) {
+            if (event.target.value) plas();
+        }
     }
 }
 
@@ -132,7 +257,6 @@ function showThisTaplePlaer() {
 function endMath() {
     let scoreL = document.querySelectorAll(".plaer");
     scoreL.forEach((item) => {
-        console.log(item);
         let name = item.children[0].children[1].innerHTML;
         let thisScore = +item.children[1].children[0].innerHTML;
         let plas = +item.children[1].children[1].value;
@@ -168,9 +292,7 @@ if (!listTable.includes("New")) {
 let thisTable = {};
 // Збереження і завантаження
 
-menu.addEventListener("click", openMenu);
-tables.addEventListener("click", tablesList);
-newTable.addEventListener("click", createNewTable);
+menuBotton.addEventListener("click", openMenu);
 plasing.addEventListener("click", endMath);
 
 openMenu();
