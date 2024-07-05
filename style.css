@@ -155,3 +155,7 @@ p {
 .ower {
     margin-left: 20px;
 }
+
+.taible_page {
+    touch-action: none
+}

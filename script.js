@@ -4,6 +4,103 @@ let modalBacgraund = document.querySelector("#modal_bacgraund");
 let listPlaersOnTable = document.querySelector("#ThisTablePlaers");
 let plasing = document.querySelector("#plasing");
 
+function dragon({
+    target,
+    cordsMouse: [x, y],
+    owerStyleClass,
+    handOff = function () {
+        return false;
+    }
+}) {
+    target.ondragstart = function () {
+        return false;
+    };
+
+    let oldPozition;
+    let ower;
+    let oldOwer;
+    let dragonName = target.dataset.dragonName;
+
+    if (target.previousElementSibling) {
+        oldPozition = [target.previousElementSibling, "after"];
+    } else if (target.nextElementSibling) {
+        oldPozition = [target.nextElementSibling, "before"];
+    } else if (target.parentElement) {
+        oldPozition = [target.parentElement, "child"];
+    }
+    target.style.position = "absolute";
+    modalBacgraund.append(target);
+
+    function moveAt(x, y) {
+        target.style.left = x - target.offsetWidth / 2 + "px";
+        target.style.top = y - target.offsetHeight / 2 + "px";
+
+        ower = document.elementsFromPoint(
+            x + target.offsetWidth / 2,
+            y + target.offsetHeight / 2
+        );
+        function findeSibling(ower) {
+            for (let x = 0; x < ower.length; x++) {
+                if (dragonName === ower[x]?.dataset.dragonName) {
+                    return ower[x];
+                }
+            }
+            return null;
+        }
+
+        ower = findeSibling(ower);
+        if (ower === null) {
+            document
+                .querySelectorAll("." + owerStyleClass)
+                .forEach((it) => it.classList.remove(owerStyleClass));
+            oldOwer = null;
+        } else {
+            if (ower != oldOwer && ower.dataset.nameTable != "New") {
+                ower.classList.add(owerStyleClass);
+                if (oldOwer) {
+                    oldOwer.classList.remove(owerStyleClass);
+                }
+                oldOwer = ower;
+            }
+        }
+    }
+
+    function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY);
+    }
+
+    function putInplace() {
+        switch (oldPozition[1]) {
+            case "after":
+                oldPozition[0].after(target);
+                break;
+            case "before":
+                oldPozition[0].before(target);
+                break;
+            case "child":
+                oldPozition[0].append(target);
+                break;
+        }
+    }
+
+    function drop() {
+        document.removeEventListener("pointermove", onMouseMove);
+        target.style.position = "";
+        if (!handOff(oldOwer, target)) {
+            putInplace();
+        }
+        document.querySelectorAll("." + owerStyleClass).forEach((item) => {
+            item.classList.remove(owerStyleClass);
+        });
+        document.removeEventListener("pointermove", onMouseMove);
+        target.removeEventListener("pointerup", drop);
+    }
+
+    moveAt(x, y);
+    document.addEventListener("pointermove", onMouseMove);
+    target.addEventListener("pointerup", drop);
+}
+
 function mainMenu(prop = "close") {
     let hidens = document.querySelector("#hidens");
     let children = modalBacgraund.children;
@@ -19,12 +116,13 @@ function mainMenu(prop = "close") {
             tables.addEventListener("click", tablesList);
 
             listTable.forEach((item) => {
-                let table = document.createElement("section");
-                table.classList.add("taible_page");
-                table.innerHTML = ` <img src="icons/New_table.png" />
-                                        <p>${item}</p>`;
-                table.dataset.nameTable = item;
-                tables.append(table);
+                tables.insertAdjacentHTML(
+                    "beforeend",
+                    `<section class='taible_page' data-dragon-name = 'taible' data-name-table = ${item}>
+                        <img src="icons/New_table.png" />
+                        <p>${item}</p>
+                    </section>`
+                );
             });
 
             return;
@@ -58,81 +156,51 @@ function tablesList(event) {
             }
             break;
         case "pointerdown":
+            if (table.dataset.nameTable === "New") {
+                return false;
+            }
             event.target.addEventListener("pointerup", () => {
                 clearTimeout(timer);
             });
-
-            function dragon(target) {
-                target.ondragstart = function () {
-                    return false;
-                };
-                console.log(target);
-                let oldPozition;
-                let ower;
-                let owerSibling;
-                if (target.previousElementSibling) {
-                    oldPozition = [target.previousElementSibling, "after"];
-                } else if (target.nextElementSibling) {
-                    oldPozition = [target.nextElementSibling, "before"];
-                } else if (target.parentElement) {
-                    oldPozition = [target.parentElement, "child"];
-                }
-                target.style.position = "absolute";
-                modalBacgraund.append(target);
-
-                function moveAt(x, y) {
-                    target.style.left = x - target.offsetWidth / 2 + "px";
-                    target.style.top = y - target.offsetHeight / 2 + "px";
-
-                    ower = document.elementsFromPoint(
-                        x + target.offsetWidth,
-                        y + target.offsetHeight
-                    );
-
-                    if (ower[0]?.classList[0] == target.classList[0]) {
-                        if (ower != owerSibling) {
-                            if (owerSibling)
-                                owerSibling.classList.remove("ower");
-                            owerSibling = ower[0];
-                            owerSibling.classList.add("ower");
-                        }
-                    }
-                }
-
-                function onMouseMove(event) {
-                    moveAt(event.pageX, event.pageY);
-                }
-
-                function drop() {
-                    document.removeEventListener("pointermove", onMouseMove);
-                    target.style.position = "";
-                    switch (oldPozition[1]) {
-                        case "after":
-                            oldPozition[0].after(target);
-                            break;
-                        case "before":
-                            oldPozition[0].before(target);
-                            break;
-                        case "child":
-                            oldPozition[0].append(target);
-                            break;
-                    }
-                    document.querySelectorAll(".ower").forEach((item) => {
-                        item.classList.remove("ower");
-                    });
-                }
-
-                moveAt(event.pageX, event.pageY);
-                document.addEventListener("pointermove", onMouseMove);
-                target.addEventListener("pointerup", drop);
-            }
 
             let timer = setTimeout(function () {
                 event.target.oncontextmenu = function () {
                     return false;
                 };
-                dragon(table);
-            }, 1000);
+
+                dragon({
+                    target: table,
+                    cordsMouse: [event.pageX, event.pageY],
+                    owerStyleClass: "ower",
+                    handOff(ower, target) {
+                        if (ower) {
+                            ower.before(target);
+                            listTable.splice(
+                                listTable.indexOf(target.dataset.nameTable),
+                                1
+                            );
+                            listTable.splice(
+                                listTable.indexOf(ower.dataset.nameTable),
+                                0,
+                                target.dataset.nameTable
+                            );
+                            setLocalStorege("Table_List", listTable);
+                            return true;
+                        } else {
+                            if (confirm("Ви бажаєте видалити елемент?")) {
+                                target.remove();
+                                listTable.splice(
+                                    listTable.indexOf(target.dataset.nameTable),
+                                    1
+                                );
+                                setLocalStorege("Table_List", listTable);
+                                return true;
+                            }
+                            return false;
+                        }
+                    }
+                });
+            }, 500);
             break;
     }
 }
