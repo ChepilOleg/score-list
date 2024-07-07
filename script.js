@@ -1,7 +1,7 @@
 let menuBotton = document.querySelector("#menu-button");
 let modalBacgraund = document.querySelector("#modal_bacgraund");
 
-let listPlaersOnTable = document.querySelector("#ThisTablePlaers");
+let listElements = document.querySelector("#list-elements ");
 let plasing = document.querySelector("#plasing");
 
 function dragon({
@@ -55,7 +55,7 @@ function dragon({
                 .forEach((it) => it.classList.remove(owerStyleClass));
             oldOwer = null;
         } else {
-            if (ower != oldOwer && ower.dataset.nameTable != "New") {
+            if (ower != oldOwer && ower.dataset.nameList != "New") {
                 ower.classList.add(owerStyleClass);
                 if (oldOwer) {
                     oldOwer.classList.remove(owerStyleClass);
@@ -104,34 +104,33 @@ function dragon({
 function mainMenu(prop = "close") {
     let hidens = document.querySelector("#hidens");
     let children = modalBacgraund.children;
+    modalBacgraund.style.visibility = "visible";
     hidens.append(...children);
 
     if (prop != "close") {
-        modalBacgraund.style.visibility = "visible";
-        if (prop === "table") {
-            let tables = document.querySelector("#modal_table");
-            tables.innerHTML = "";
-            modalBacgraund.append(tables);
-            tables.addEventListener("pointerdown", tablesList);
-            tables.addEventListener("click", tablesList);
+        if (prop === "folder") {
+            let folder = document.querySelector("#modal-folder");
+            folder.innerHTML = "";
+            modalBacgraund.append(folder);
+            folder.addEventListener("pointerdown", folderListener);
+            folder.addEventListener("click", folderListener);
 
-            listTable.forEach((item) => {
-                tables.insertAdjacentHTML(
+            inFolder.forEach((item) => {
+                folder.insertAdjacentHTML(
                     "beforeend",
-                    `<section class='taible_page' data-dragon-name = 'taible' data-name-table = ${item}>
-                        <img src="icons/New_table.png" />
+                    `<section class='list' data-dragon-name = 'list' data-name-list = ${item}>
+                        <img src="icons/d.png" />
                         <p>${item}</p>
                     </section>`
                 );
             });
-
             return;
-        } else if (prop === "plaers") {
-            let newTable = document.querySelector("#modal_new_plaer_menu");
-            modalBacgraund.append(newTable);
-            createNewTable();
-            newTable.addEventListener("click", createNewTable);
-            newTable.addEventListener("input", createNewTable);
+        } else if (prop === "newList") {
+            let newList = document.querySelector("#modal-new-list");
+            modalBacgraund.append(newList);
+            createNewList();
+            newList.addEventListener("click", createNewList);
+            newList.addEventListener("input", createNewList);
             return;
         } else {
             alert("Функція отримала не коректні данні");
@@ -140,23 +139,23 @@ function mainMenu(prop = "close") {
     modalBacgraund.style.visibility = "hidden";
 }
 function openMenu() {
-    mainMenu("table");
+    mainMenu("folder");
 }
 
-function tablesList(event) {
-    let table = event.target.closest("section");
+function folderListener(event) {
+    let list = event.target.closest("section");
     switch (event.type) {
         case "click":
-            if (table.dataset.nameTable === "New") {
-                mainMenu("plaers");
+            if (list.dataset.nameList === "New") {
+                mainMenu("newList");
             } else {
-                thisTable = getLocalStorege("Table=" + table.dataset.nameTable);
-                showThisTaplePlaer();
+                thisList = getLocalStorege("List=" + list.dataset.nameList);
+                showList();
                 mainMenu();
             }
             break;
         case "pointerdown":
-            if (table.dataset.nameTable === "New") {
+            if (list.dataset.nameList === "New") {
                 return false;
             }
             event.target.addEventListener("pointerup", () => {
@@ -169,31 +168,31 @@ function tablesList(event) {
                 };
 
                 dragon({
-                    target: table,
+                    target: list,
                     cordsMouse: [event.pageX, event.pageY],
                     owerStyleClass: "ower",
                     handOff(ower, target) {
                         if (ower) {
                             ower.before(target);
-                            listTable.splice(
-                                listTable.indexOf(target.dataset.nameTable),
+                            inFolder.splice(
+                                inFolder.indexOf(target.dataset.nameList),
                                 1
                             );
-                            listTable.splice(
-                                listTable.indexOf(ower.dataset.nameTable),
+                            inFolder.splice(
+                                inFolder.indexOf(ower.dataset.nameList),
                                 0,
-                                target.dataset.nameTable
+                                target.dataset.nameList
                             );
-                            setLocalStorege("Table_List", listTable);
+                            setLocalStorege("inFolder", inFolder);
                             return true;
                         } else {
                             if (confirm("Ви бажаєте видалити елемент?")) {
                                 target.remove();
-                                listTable.splice(
-                                    listTable.indexOf(target.dataset.nameTable),
+                                inFolder.splice(
+                                    inFolder.indexOf(target.dataset.nameList),
                                     1
                                 );
-                                setLocalStorege("Table_List", listTable);
+                                setLocalStorege("inFolder", inFolder);
                                 return true;
                             }
                             return false;
@@ -205,12 +204,12 @@ function tablesList(event) {
     }
 }
 
-function createNewTable(event) {
-    let listNP = document.querySelector("#modal_new_plaer_list");
+function createNewList(event) {
+    let listElements = document.querySelector("#new-list-elements");
 
     function plas() {
         let li = document.createElement("li");
-        li.innerHTML = `<section class="create-plaers">
+        li.innerHTML = `<section class="create-element">
                             <input
                                 type="color"
                                 name="color"
@@ -223,26 +222,26 @@ function createNewTable(event) {
                             />
                         </section>`;
 
-        listNP.append(li);
+        listElements.append(li);
     }
 
     if (!event) {
-        listNP.innerHTML = "";
+        listElements.innerHTML = "";
         plas();
         return;
     } else if (event.type === "click") {
         function end() {
-            let forms = document.forms.plaer;
+            let forms = document.forms["new-list"];
             let inputs = forms.elements;
-            thisTable.plaers = [];
+            thisList.elements = [];
             for (let x = 0; x < inputs.length; x += 2) {
                 let name = inputs[x + 1].value;
                 if (!name) break;
 
-                thisTable.plaers.forEach((item) => {
+                thisList.elements.forEach((item) => {
                     if (item.name == name) {
                         function repetition(x) {
-                            for (let item of thisTable.plaers) {
+                            for (let item of thisList.elements) {
                                 if (item.name === name + `(${x})`) {
                                     return repetition(x + 1);
                                 }
@@ -258,32 +257,32 @@ function createNewTable(event) {
                     name: name,
                     score: 0
                 };
-                thisTable.plaers.push(pl);
+                thisList.elements.push(pl);
             }
 
-            let name = prompt("Введіть назву столу");
+            let name = prompt("Введіть назву списку");
             while (true) {
-                if (listTable.includes(name)) {
+                if (inFolder.includes(name)) {
                     name = prompt("Стіл із таким іменем уже існує");
                 } else if (!name) {
                     if (confirm("Ви бажаєте скасувати створення столу?")) {
-                        mainMenu("table");
-                        thisTable = {};
+                        mainMenu("folder");
+                        thisList = {};
                         return;
                     } else {
-                        name = prompt("Введіть назву столу");
+                        name = prompt("Введіть назву списку");
                     }
                 } else {
-                    thisTable.name = name;
+                    thisList.name = name;
                     mainMenu();
-                    listTable.push(name);
-                    setLocalStorege("Table_List", listTable);
-                    setLocalStorege("Table=" + name, thisTable);
+                    inFolder.push(name);
+                    setLocalStorege("inFolder", inFolder);
+                    setLocalStorege("List=" + name, thisList);
                     break;
                 }
             }
 
-            showThisTaplePlaer();
+            showList();
         }
 
         if (event.target.id === "plas") {
@@ -299,37 +298,37 @@ function createNewTable(event) {
     }
 }
 
-function showThisTaplePlaer() {
-    listPlaersOnTable.innerHTML = "";
-    let nameTable = document.querySelector("#name-table");
-    nameTable.innerHTML = thisTable.name;
-    for (let x = 0; x < thisTable.plaers.length; x++) {
-        let plaer = document.createElement("li");
-        plaer.innerHTML = ` <div class="plaer">
+function showList() {
+    listElements.innerHTML = "";
+    let nameList = document.querySelector("#list-name");
+    nameList.innerHTML = thisList.name;
+    for (let x = 0; x < thisList.elements.length; x++) {
+        let element = document.createElement("li");
+        element.innerHTML = ` <div class="element">
                                 <div>
                                     <div
                                         class="color-ring"
-                                        style="background-color: ${thisTable.plaers[x].color}"
+                                        style="background-color: ${thisList.elements[x].color}"
                                     ></div>
-                                    <p>${thisTable.plaers[x].name}</p>
+                                    <p>${thisList.elements[x].name}</p>
                                 </div>
                                     <div class = "score">
-                                    <p>${thisTable.plaers[x].score}</p>
+                                    <p>${thisList.elements[x].score}</p>
                                     <input type="number">
                                 </div>
                             </div>`;
-        listPlaersOnTable.append(plaer);
+        listElements.append(element);
     }
 }
 
 function endMath() {
-    let scoreL = document.querySelectorAll(".plaer");
+    let scoreL = document.querySelectorAll(".element");
     scoreL.forEach((item) => {
         let name = item.children[0].children[1].innerHTML;
         let thisScore = +item.children[1].children[0].innerHTML;
         let plas = +item.children[1].children[1].value;
 
-        thisTable.plaers.find((item) => {
+        thisList.elements.find((item) => {
             if (item.name === name) {
                 item.score = thisScore + plas;
             }
@@ -338,11 +337,18 @@ function endMath() {
         item.children[1].children[0].innerHTML = thisScore + plas;
         item.children[1].children[1].value = "";
     });
-    thisTable.plaers.sort((a, b) => b.score - a.score);
-    setLocalStorege("Table=" + thisTable.name, thisTable);
-    // ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ
-    showThisTaplePlaer();
-    // ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ ПЕРЕРОБИТИ
+    thisList?.elements?.sort((a, b) => b.score - a.score);
+    setLocalStorege("List=" + thisList.name, thisList);
+    showList();
+}
+
+function startJob() {
+    if (inFolder.length > 1) {
+        thisList = getLocalStorege("List=" + inFolder[1]);
+        showList();
+    } else {
+        mainMenu("newList");
+    }
 }
 
 // Збереження і завантаження
@@ -353,14 +359,14 @@ const setLocalStorege = (name, products) => {
     localStorage.setItem(name, JSON.stringify(products));
 };
 
-let listTable = getLocalStorege("Table_List");
-if (!listTable.includes("New")) {
-    listTable.unshift("New");
+let inFolder = getLocalStorege("inFolder");
+if (!inFolder.includes("New")) {
+    inFolder.unshift("New");
 }
-let thisTable = {};
+let thisList = {};
 // Збереження і завантаження
 
 menuBotton.addEventListener("click", openMenu);
 plasing.addEventListener("click", endMath);
 
-openMenu();
+startJob();
